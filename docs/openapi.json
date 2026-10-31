@@ -1,0 +1,172 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "StockFlow Server POC API",
+    "version": "1.0.0",
+    "description": "Read-only local classroom API for the Stock Summary page. No authentication is required."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:4000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/stock-summary": {
+      "get": {
+        "summary": "Get stock summary",
+        "description": "Returns overview totals, monthly movement, and product stock for the selected warehouse and month. Product balances are current sample balances; the month selects movement data.",
+        "operationId": "getStockSummary",
+        "parameters": [
+          {
+            "name": "warehouse",
+            "in": "query",
+            "description": "Warehouse to include. Defaults to all warehouses.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "colombo", "kandy", "galle"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "description": "Month used for movement totals. Defaults to August 2026.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["2026-08", "2026-09", "2026-10"],
+              "default": "2026-08"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock summary",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StockSummary" },
+                "example": {
+                  "warehouse": "colombo",
+                  "month": "2026-08",
+                  "totals": {
+                    "activeProducts": 6,
+                    "remainingStock": 3825,
+                    "deliveredThisMonth": 300,
+                    "withFdos": 30,
+                    "stockVariance": 4
+                  },
+                  "movement": [
+                    {
+                      "month": "Aug 2026",
+                      "delivered": 300,
+                      "issued": 430,
+                      "returned": 70,
+                      "variance": 4,
+                      "withFdos": 50
+                    }
+                  ],
+                  "products": [
+                    {
+                      "sku": "RIC-5K-001",
+                      "name": "Premium Rice 5kg",
+                      "stock": 300,
+                      "fdos": 10,
+                      "variance": 0,
+                      "status": "healthy"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid warehouse or month filter",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": { "error": "Invalid warehouse or month filter." }
+              }
+            }
+          },
+          "500": {
+            "description": "Database or server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": { "error": "Unable to load stock summary." }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StockSummary": {
+        "type": "object",
+        "required": ["warehouse", "month", "totals", "movement", "products"],
+        "properties": {
+          "warehouse": { "type": "string", "enum": ["all", "colombo", "kandy", "galle"] },
+          "month": { "type": "string", "enum": ["2026-08", "2026-09", "2026-10"] },
+          "totals": { "$ref": "#/components/schemas/OverviewTotals" },
+          "movement": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/MonthlyMovement" }
+          },
+          "products": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProductStock" }
+          }
+        }
+      },
+      "OverviewTotals": {
+        "type": "object",
+        "required": ["activeProducts", "remainingStock", "deliveredThisMonth", "withFdos", "stockVariance"],
+        "properties": {
+          "activeProducts": { "type": "integer", "minimum": 0 },
+          "remainingStock": { "type": "integer", "minimum": 0 },
+          "deliveredThisMonth": { "type": "integer", "minimum": 0 },
+          "withFdos": { "type": "integer", "minimum": 0 },
+          "stockVariance": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "MonthlyMovement": {
+        "type": "object",
+        "required": ["month", "delivered", "issued", "returned", "variance", "withFdos"],
+        "properties": {
+          "month": { "type": "string", "example": "Aug 2026" },
+          "delivered": { "type": "integer", "minimum": 0 },
+          "issued": { "type": "integer", "minimum": 0 },
+          "returned": { "type": "integer", "minimum": 0 },
+          "variance": { "type": "integer", "minimum": 0 },
+          "withFdos": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "ProductStock": {
+        "type": "object",
+        "required": ["sku", "name", "stock", "fdos", "variance", "status"],
+        "properties": {
+          "sku": { "type": "string", "example": "RIC-5K-001" },
+          "name": { "type": "string", "example": "Premium Rice 5kg" },
+          "stock": { "type": "integer", "minimum": 0 },
+          "fdos": { "type": "integer", "minimum": 0 },
+          "variance": { "type": "integer", "minimum": 0 },
+          "status": {
+            "type": "string",
+            "enum": ["healthy", "low-stock", "variance-detected"]
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": { "type": "string" }
+        }
+      }
+    }
+  }
+}

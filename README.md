@@ -13,4 +13,6 @@ A small local Express + MongoDB example for the Stock Summary page. It is a clas
 
 Try `http://127.0.0.1:4000/api/stock-summary?warehouse=all&month=2026-08`. Warehouse values: `all`, `colombo`, `kandy`, `galle`. Months: `2026-08`, `2026-09`, `2026-10`. Invalid filters return HTTP 400.
 
+Import `docs/openapi.json` into Postman to explore the available API and query parameters.
+
 The browser page uses Axios to request this endpoint. The route returns totals, one chart record, and product rows. Product search and status filtering happen in the browser. The Add Stock dialog is only a visual demonstration.
