@@ -109,8 +109,14 @@
         "type": "object",
         "required": ["warehouse", "month", "totals", "movement", "products"],
         "properties": {
-          "warehouse": { "type": "string", "enum": ["all", "colombo", "kandy", "galle"] },
-          "month": { "type": "string", "enum": ["2026-08", "2026-09", "2026-10"] },
+          "warehouse": {
+            "type": "string",
+            "enum": ["all", "colombo", "kandy", "galle"]
+          },
+          "month": {
+            "type": "string",
+            "enum": ["2026-08", "2026-09", "2026-10"]
+          },
           "totals": { "$ref": "#/components/schemas/OverviewTotals" },
           "movement": {
             "type": "array",
@@ -124,7 +130,13 @@
       },
       "OverviewTotals": {
         "type": "object",
-        "required": ["activeProducts", "remainingStock", "deliveredThisMonth", "withFdos", "stockVariance"],
+        "required": [
+          "activeProducts",
+          "remainingStock",
+          "deliveredThisMonth",
+          "withFdos",
+          "stockVariance"
+        ],
         "properties": {
           "activeProducts": { "type": "integer", "minimum": 0 },
           "remainingStock": { "type": "integer", "minimum": 0 },
@@ -135,7 +147,14 @@
       },
       "MonthlyMovement": {
         "type": "object",
-        "required": ["month", "delivered", "issued", "returned", "variance", "withFdos"],
+        "required": [
+          "month",
+          "delivered",
+          "issued",
+          "returned",
+          "variance",
+          "withFdos"
+        ],
         "properties": {
           "month": { "type": "string", "example": "Aug 2026" },
           "delivered": { "type": "integer", "minimum": 0 },

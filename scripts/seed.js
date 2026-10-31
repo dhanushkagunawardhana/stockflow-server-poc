@@ -5,6 +5,7 @@ import Product from "../src/models/product.model.js";
 import StockBalance from "../src/models/stockBalance.model.js";
 import MonthlyMovement from "../src/models/monthlyMovement.model.js";
 
+// Small, predictable records make the API response easy to explain in class.
 const products = [
   ["RIC-5K-001", "Premium Rice 5kg", "healthy"],
   ["OIL-1L-002", "Cooking Oil 1L", "variance-detected"],
@@ -18,6 +19,7 @@ const months = ["2026-08", "2026-09", "2026-10"];
 
 try {
   await connectDb();
+  // Upsert updates a matching SKU or inserts it when absent, so reruns do not duplicate products.
   for (const [sku, name, status] of products) {
     await Product.updateOne(
       { sku },
@@ -25,6 +27,7 @@ try {
       { upsert: true },
     );
   }
+  // Seed one current stock balance per product and warehouse.
   for (let w = 0; w < warehouses.length; w++) {
     for (let p = 0; p < products.length; p++) {
       const sku = products[p][0];
@@ -40,6 +43,7 @@ try {
         { upsert: true },
       );
     }
+    // Seed one movement record per month and warehouse for the chart and delivery card.
     for (let m = 0; m < months.length; m++) {
       await MonthlyMovement.updateOne(
         { warehouse: warehouses[w], month: months[m] },
@@ -61,5 +65,6 @@ try {
   console.error("Seed failed:", error);
   process.exitCode = 1;
 } finally {
+  // Close the connection even if a seed write fails, allowing the script to exit.
   await mongoose.disconnect();
 }
